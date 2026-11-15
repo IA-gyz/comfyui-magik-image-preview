@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-magik-image-preview"
-version = "1.0.0"
+version = "1.0.1"
 description = 'Magik Image Preview'
 authors = [{name = "IA-gyz"}]
 license = {text = "MIT"}

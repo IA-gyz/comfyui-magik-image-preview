@@ -16,9 +16,9 @@ Extract `Magik_Image_Preview` into `ComfyUI/custom_nodes/`, restart ComfyUI, and
 - **Same pixel scale:** both images use the same scale, centered; preserves their relative pixel dimensions.
 - **Note:** edit the selected image's note (B in comparison mode). Notes appear beneath the viewport and in thumbnail tooltips.
 - **Open:** open selected full-resolution PNG in a browser tab.
-- **Clear:** clear this node's history references and notes.
+- **Clear:** clear this node's history references and notes, and delete its temporary PNG/WebP files.
 
-History file references, notes and alignment preference are stored in workflow properties. Save the workflow to preserve them. Images themselves are temporary files under ComfyUI's temp directory, in `magik_image_preview/`. If that directory is cleared, restored history displays an unavailable message; run again to create new previews. This is not an archival image saver. Clear and history eviction do not delete files; normal ComfyUI temp-file management applies. Full-resolution PNGs are written for every batch image, plus small WebP thumbnails. Large batches still require proportional disk space.
+History file references, notes and alignment preference are stored in workflow properties. Save the workflow to preserve them. Images themselves are temporary files under ComfyUI's temp directory, in `magik_image_preview/`. If that directory is cleared, restored history displays an unavailable message; run again to create new previews. This is not an archival image saver. Clear deletes this node's temporary files; history eviction does not delete files, and normal ComfyUI temp-file management applies. Full-resolution PNGs are written for every batch image, plus small WebP thumbnails. Large batches still require proportional disk space.
 
 PNG metadata contains the prompt and extra PNG information unless ComfyUI metadata is disabled. There is no prompt-history editor or viewer. Workflow properties can contain notes and file references even when PNG metadata is disabled.
 

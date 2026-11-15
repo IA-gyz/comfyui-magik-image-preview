@@ -68,8 +68,10 @@ function install(node) {
         const item = lookup(compare ? bKey : selected);
         if (item) window.open(url(item), "_blank", "noopener,noreferrer");
     });
-    button("Clear", "Clear this node's history and notes; temporary files remain managed by ComfyUI", () => {
+    button("Clear", "Clear this node's history and notes, and delete its temporary files", () => {
+        const files = items().flatMap(item => [item.filename, item.thumbnail || item.filename]);
         state().history = []; state().notes = {}; selected = aKey = bKey = ""; compare = grid = false; render();
+        api.fetchApi("/magik_image_preview/delete", {method: "POST", body: JSON.stringify({files})}).catch(() => {});
     });
     const controls = document.createElement("div");
     controls.style.cssText = "display:flex;gap:5px;flex-wrap:wrap;padding:5px;flex:none";
