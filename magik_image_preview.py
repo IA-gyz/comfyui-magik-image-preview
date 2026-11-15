@@ -1,13 +1,19 @@
 """Standalone temporary image previews; no iTools dependencies."""
 import json
 import os
+import re
 import uuid
 
 import numpy as np
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
+from aiohttp import web
 import folder_paths
 from comfy.cli_args import args
+from server import PromptServer
+
+PREVIEW_SUBFOLDER = "magik_image_preview"
+FILENAME_PATTERN = re.compile(r"^[0-9a-f]{32}_\d{5}(?:\.png|_thumb\.webp)$")
 
 
 class MagikImagePreview:
@@ -30,7 +36,7 @@ class MagikImagePreview:
         if images.shape[1] < 1 or images.shape[2] < 1:
             raise ValueError("Preview images must have positive width and height.")
         root = folder_paths.get_temp_directory()
-        subfolder = "magik_image_preview"
+        subfolder = PREVIEW_SUBFOLDER
         destination = os.path.join(root, subfolder)
         os.makedirs(destination, exist_ok=True)
         generation = uuid.uuid4().hex
@@ -59,3 +65,28 @@ class MagikImagePreview:
                             "width": int(tensor.shape[1]), "height": int(tensor.shape[0]),
                             "batch_index": index, "generation": generation})
         return {"ui": {"magik_preview": results}}
+
+
+@PromptServer.instance.routes.post("/magik_image_preview/delete")
+async def delete_magik_previews(request):
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "Expected a JSON body."}, status=400)
+    files = data.get("files") if isinstance(data, dict) else None
+    if not isinstance(files, list) or not all(isinstance(name, str) for name in files):
+        return web.json_response({"error": "Expected a JSON object with a 'files' list of strings."}, status=400)
+    directory = os.path.join(folder_paths.get_temp_directory(), PREVIEW_SUBFOLDER)
+    deleted, missing, rejected = [], [], []
+    for name in files:
+        if not FILENAME_PATTERN.match(name):
+            rejected.append(name)
+            continue
+        try:
+            os.remove(os.path.join(directory, name))
+            deleted.append(name)
+        except FileNotFoundError:
+            missing.append(name)
+        except OSError as error:
+            return web.json_response({"error": f"Failed to delete {name}: {error}"}, status=500)
+    return web.json_response({"deleted": deleted, "missing": missing, "rejected": rejected})
