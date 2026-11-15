@@ -84,7 +84,6 @@ function install(node) {
     root.append(status);
     // Let ComfyUI own DOM placement and scaling; never resize its parent wrapper.
     const widget = node.addDOMWidget("magik_preview", "custom", root, {serialize: false});
-    widget.computeSize = width => [width, 330];
     widget.options ||= {};
     widget.options.getMinHeight = () => 240;
     node.setSize([Math.max(node.size[0], 460), Math.max(node.size[1], 400)]);
